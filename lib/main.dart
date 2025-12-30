@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (_) => LoginScreen(userService: userService),
         '/signup': (_) => SignupScreen(userService: userService),
-        // Home route will be navigated with role dynamically
       },
     );
   }

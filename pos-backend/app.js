@@ -15,8 +15,6 @@ app.get("/", (req, res) => {
 });
 
 //API Routes
-app.use("/transactions", require("./routes/transactionRoutes"));
-app.use("/inventory", require("./routes/inventoryRoutes"));
 app.use("/products", require("./routes/productRoutes"));
 app.use("/users", require("./routes/userRoutes"));
 app.use("/sales", require("./routes/saleRoutes"));
