@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:point_of_sale/screens/app_drawer.dart'; // 1. Import the shared AppDrawer
 
 class HomePage extends StatelessWidget {
   final String role;
@@ -20,7 +21,10 @@ class HomePage extends StatelessWidget {
       if (role == 'admin') cards.add(buildCard(context, 'Users', Icons.people));
 
       if (role == 'admin' || role == 'cashier') {
-        cards.add(buildCard(context, 'Sales', Icons.shopping_cart));
+        cards.add(buildCard(context, 'Sales', Icons.shopping_cart, () {
+          // Also make the card navigate to the sales page
+          Navigator.pushNamed(context, '/sales');
+        }));
       }
 
       if (role == 'admin' || role == 'cashier') {
@@ -40,79 +44,26 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text('$role Home')),
-      drawer: buildDrawer(context),
+      // 2. Use the shared AppDrawer widget instead of the local one
+      drawer: AppDrawer(role: role),
       body: buildDashboard(),
     );
   }
 
+  // 3. This entire method should be deleted as it's now handled by app_drawer.dart
+  /*
   Drawer buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(color: Colors.deepPurple),
-            child: Text(
-              role.toUpperCase(),
-              style: const TextStyle(color: Colors.white, fontSize: 24),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Dashboard'),
-            onTap: () => Navigator.pop(context),
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.store),
-            title: const Text('Products'),
-            onTap: () {
-              Navigator.pop(context);
-
-            },
-          ),
-
-
-          if (role == 'admin')
-            ListTile(
-              leading: const Icon(Icons.people),
-              title: const Text('Users'),
-              onTap: () {
-                Navigator.pop(context);
-
-              },
-            ),
-
-          if (role == 'admin' || role == 'cashier')
-            ListTile(
-              leading: const Icon(Icons.shopping_cart),
-              title: const Text('Sales'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to SalesPage()
-              },
-            ),
-          // Transactions - admin & cashier
-          // Logout
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/login'); // make sure route exists in main.dart
-            },
-          ),
-        ],
-      ),
-    );
+    ...
   }
+  */
 
-  Widget buildCard(BuildContext context, String title, IconData icon) {
+  // I've updated buildCard to accept an onTap callback
+  Widget buildCard(BuildContext context, String title, IconData icon, [VoidCallback? onTap]) {
     return Card(
       elevation: 4,
       child: InkWell(
-        onTap: () {
-   
+        onTap: onTap ?? () {
+          print('$title card tapped');
         },
         child: Center(
           child: Column(
