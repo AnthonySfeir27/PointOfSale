@@ -11,7 +11,7 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _role = 'customer';
+  String _role = 'cashier';
   bool _loading = false;
   String? _error;
 
