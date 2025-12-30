@@ -48,7 +48,6 @@ class _SignupScreenState extends State<SignupScreen> {
               items: const [
                 DropdownMenuItem(value: 'admin', child: Text('Admin')),
                 DropdownMenuItem(value: 'cashier', child: Text('Cashier')),
-                DropdownMenuItem(value: 'customer', child: Text('Customer')),
               ],
               onChanged: (v) => setState(() { _role = v!; }),
             ),
