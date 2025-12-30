@@ -6,10 +6,8 @@ const saleSchema = new mongoose.Schema({
     quantity: { type: Number, required: true, max: 50 }
   }],
   cashier: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  customer: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // optional customer
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   total: { type: Number, required: true, max: 10000 },
-  inventoryLogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Inventory" }],
-  transaction: { type: mongoose.Schema.Types.ObjectId, ref: "Transaction" },
   date: { type: Date, default: Date.now }
 });
 

@@ -1,52 +1,38 @@
 const Sale = require("../models/Sale");
-const Inventory = require("../models/Inventory");
 const Product = require("../models/Product");
-const Transaction = require("../models/Transaction");
+const User = require("../models/User");
 
 
 exports.createSale = async (req, res) => {
   try {
-    const { products, cashier, customer, total, createTransaction } = req.body;
-
-   
-    const sale = new Sale({ products, cashier, customer, total });
-    await sale.save();
+    const { products, cashier, total } = req.body;
 
 
-    const inventoryLogs = [];
+    const cashierUser = await User.findById(cashier);
+    if (!cashierUser) return res.status(404).json({ error: "Cashier not found" });
+
+
     for (let item of products) {
       const product = await Product.findById(item.product);
-      if (!product) continue;
-
-      const log = await Inventory.create({
-        product: product._id,
-        quantity: item.quantity,
-        type: "OUT"
-      });
-      inventoryLogs.push(log._id);
+      if (!product) return res.status(404).json({ error: `Product ${item.product} not found` });
+      if (item.quantity > product.stockQuantity) {
+        return res.status(400).json({ error: `Not enough stock for product ${product.name}` });
+      }
     }
-    sale.inventoryLogs = inventoryLogs;
+
+
+    for (let item of products) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stockQuantity: -item.quantity },
+      });
+    }
+
+    const sale = new Sale({ products, cashier, total });
     await sale.save();
-
-    
-    if (createTransaction) {
-      const transaction = await Transaction.create({
-        sale: sale._id,
-        user: cashier,
-        method: createTransaction.method,
-        amount: total,
-        inventoryLogs
-      });
-      sale.transaction = transaction._id;
-      await sale.save();
-    }
 
     const populatedSale = await Sale.findById(sale._id)
       .populate("products.product")
-      .populate("cashier")
-      .populate("customer")
-      .populate("inventoryLogs")
-      .populate("transaction");
+      .populate("cashier");
 
     res.status(201).json(populatedSale);
   } catch (err) {
@@ -58,10 +44,7 @@ exports.getSales = async (req, res) => {
   try {
     const sales = await Sale.find()
       .populate("products.product")
-      .populate("cashier")
-      .populate("customer")
-      .populate("inventoryLogs")
-      .populate("transaction");
+      .populate("cashier");
     res.json(sales);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -72,10 +55,7 @@ exports.getSaleById = async (req, res) => {
   try {
     const sale = await Sale.findById(req.params.id)
       .populate("products.product")
-      .populate("cashier")
-      .populate("customer")
-      .populate("inventoryLogs")
-      .populate("transaction");
+      .populate("cashier");
     if (!sale) return res.status(404).json({ error: "Sale not found" });
     res.json(sale);
   } catch (err) {
@@ -85,7 +65,9 @@ exports.getSaleById = async (req, res) => {
 
 exports.updateSale = async (req, res) => {
   try {
-    const sale = await Sale.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const sale = await Sale.findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate("products.product")
+      .populate("cashier");
     if (!sale) return res.status(404).json({ error: "Sale not found" });
     res.json(sale);
   } catch (err) {
@@ -97,6 +79,11 @@ exports.deleteSale = async (req, res) => {
   try {
     const sale = await Sale.findByIdAndDelete(req.params.id);
     if (!sale) return res.status(404).json({ error: "Sale not found" });
+
+    for (let item of sale.products) {
+      await Product.findByIdAndUpdate(item.product, { $inc: { stockQuantity: item.quantity } });
+    }
+
     res.json({ message: "Sale deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });

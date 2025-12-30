@@ -6,25 +6,23 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Build the role-specific body
+
     Widget buildDashboard() {
       List<Widget> cards = [];
 
-      // Products accessible to all roles
+
       cards.add(buildCard(context, 'Products', Icons.store));
 
-      // Inventory - admin only
+
       if (role == 'admin') cards.add(buildCard(context, 'Inventory', Icons.inventory));
 
-      // Users - admin only
+
       if (role == 'admin') cards.add(buildCard(context, 'Users', Icons.people));
 
-      // Sales - admin & cashier
       if (role == 'admin' || role == 'cashier') {
         cards.add(buildCard(context, 'Sales', Icons.shopping_cart));
       }
 
-      // Transactions - admin & cashier
       if (role == 'admin' || role == 'cashier') {
         cards.add(buildCard(context, 'Transactions', Icons.receipt));
       }
@@ -47,7 +45,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Drawer with role-based items
   Drawer buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -65,36 +62,27 @@ class HomePage extends StatelessWidget {
             title: const Text('Dashboard'),
             onTap: () => Navigator.pop(context),
           ),
-          // Products
+
           ListTile(
             leading: const Icon(Icons.store),
             title: const Text('Products'),
             onTap: () {
               Navigator.pop(context);
-              // Navigate to ProductsPage()
+
             },
           ),
-          // Inventory - admin only
-          if (role == 'admin')
-            ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text('Inventory'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to InventoryPage()
-              },
-            ),
-          // Users - admin only
+
+
           if (role == 'admin')
             ListTile(
               leading: const Icon(Icons.people),
               title: const Text('Users'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to UsersPage()
+
               },
             ),
-          // Sales - admin & cashier
+
           if (role == 'admin' || role == 'cashier')
             ListTile(
               leading: const Icon(Icons.shopping_cart),
@@ -105,16 +93,6 @@ class HomePage extends StatelessWidget {
               },
             ),
           // Transactions - admin & cashier
-          if (role == 'admin' || role == 'cashier')
-            ListTile(
-              leading: const Icon(Icons.receipt),
-              title: const Text('Transactions'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to TransactionsPage()
-              },
-            ),
-          const Divider(),
           // Logout
           ListTile(
             leading: const Icon(Icons.logout),
@@ -129,13 +107,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Quick-access card for dashboard
   Widget buildCard(BuildContext context, String title, IconData icon) {
     return Card(
       elevation: 4,
       child: InkWell(
         onTap: () {
-          // Navigate to respective page
+   
         },
         child: Center(
           child: Column(
@@ -151,4 +128,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-// anthony comment to test git hub
