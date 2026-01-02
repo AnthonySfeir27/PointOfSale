@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-
+import 'package:point_of_sale/screens/app_drawer.dart'; // 1. Import the shared AppDrawer
 class SalesPage extends StatefulWidget {
   @override
   _SalesPageState createState() => _SalesPageState();
@@ -24,20 +22,13 @@ class _SalesPageState extends State<SalesPage> {
     // Dummy variables for GridView, replace with your actual implementation
     final SliverGridDelegate gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2);
     final VoidCallback? onPressed = () {};
-
+    final String role="cashier";
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Removes the default back button
+      
         title: Row(
           children: [
             // Menu button on the left
-            IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: () {
-                // TODO: Implement your menu action here (e.g., open a drawer)
-                print("Menu button pressed");
-              },
-            ),
             // Spacer to push the dropdown to the right
             const SizedBox(width: 16),
             // Dropdown for categories
@@ -60,6 +51,7 @@ class _SalesPageState extends State<SalesPage> {
           ],
         ),
       ),
+       drawer: AppDrawer(role: role),
       body: Row(
         // Kermel l categories changing we basically just switch the list used in the grid
         children: [
