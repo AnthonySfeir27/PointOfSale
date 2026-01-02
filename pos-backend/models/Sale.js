@@ -6,7 +6,6 @@ const saleSchema = new mongoose.Schema({
     quantity: { type: Number, required: true, max: 50 }
   }],
   cashier: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  customer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   total: { type: Number, required: true, max: 10000 },
   date: { type: Date, default: Date.now }
 });

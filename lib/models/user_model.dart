@@ -20,12 +20,28 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    // Safe date parsing - handles both String and Date objects
+    DateTime? parseDate(dynamic dateValue) {
+      if (dateValue == null) return null;
+      if (dateValue is String) {
+        try {
+          return DateTime.parse(dateValue);
+        } catch (e) {
+          return null;
+        }
+      }
+      if (dateValue is DateTime) return dateValue;
+      // If it's a number (timestamp), convert it
+      if (dateValue is int) return DateTime.fromMillisecondsSinceEpoch(dateValue);
+      return null;
+    }
+
     return User(
-      id: json['_id'],
-      username: json['username'],
-      role: json['role'],
-      password: json['password'],
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      id: json['_id']?.toString() ?? json['id']?.toString(),
+      username: json['username']?.toString() ?? '',
+      role: json['role']?.toString() ?? 'cashier',
+      password: json['password']?.toString(),
+      createdAt: parseDate(json['createdAt']),
       preferences: json['preferences'] != null ? List<String>.from(json['preferences']) : [],
       permissions: json['permissions'] != null ? Map<String, dynamic>.from(json['permissions']) : {},
       activityLog: json['activityLog'] != null

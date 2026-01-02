@@ -42,7 +42,7 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Dashboard'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/home');
+              Navigator.pushReplacementNamed(context, '/home', arguments: role);
             },
           ),
           ListTile(
@@ -62,7 +62,7 @@ class AppDrawer extends StatelessWidget {
               title: const Text('Sales'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushReplacementNamed(context, '/sales');
+                Navigator.pushReplacementNamed(context, '/sales', arguments: role);
               },
             ),
           ListTile(

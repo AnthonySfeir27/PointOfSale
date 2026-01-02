@@ -1,7 +1,5 @@
 // C:/.../point_of_sale/lib/models/product_model.dart
 
-import 'dart:convert';
-
 class Product {
   final String id;
   final String name;  final String category;
@@ -25,22 +23,35 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Safe date parsing - handles both String and Date objects
+    DateTime parseDate(dynamic dateValue) {
+      if (dateValue == null) return DateTime.now();
+      if (dateValue is String) {
+        try {
+          return DateTime.parse(dateValue);
+        } catch (e) {
+          return DateTime.now();
+        }
+      }
+      if (dateValue is DateTime) return dateValue;
+      // If it's a number (timestamp), convert it
+      if (dateValue is int) return DateTime.fromMillisecondsSinceEpoch(dateValue);
+      return DateTime.now();
+    }
+
     return Product(
-      // Ensure the _id from MongoDB is correctly handled
-      id: json['_id'] as String,
-      name: json['name'] as String,
-      category: json['category'] as String,
-      price: (json['price'] as num).toDouble(),
+      // Ensure the _id from MongoDB is correctly handled - safe casting
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'other',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
       inStock: json['inStock'] as bool? ?? true,
       stockQuantity: json['stockQuantity'] as int? ?? 0,
       tags: List<String>.from(json['tags'] as List? ?? []),
       details: json['details'] != null
           ? Map<String, dynamic>.from(json['details'])
           : null,
-      // **FIX:** Make date parsing safer. If 'createdAt' is null, use current time.
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
+      createdAt: parseDate(json['createdAt']),
     );
   }
 

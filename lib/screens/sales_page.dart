@@ -1,10 +1,14 @@
 // C:/.../point_of_sale/lib/screens/sales_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:point_of_sale/screens/app_drawer.dart';
-import '../models/product_model.dart';import '../services/product_service.dart';
+import 'app_drawer.dart';
+import '../models/product_model.dart';
+import '../services/product_service.dart';
 
 class SalesPage extends StatefulWidget {
+  final String role;
+  const SalesPage({super.key, required this.role});
+
   @override
   _SalesPageState createState() => _SalesPageState();
 }
@@ -59,8 +63,6 @@ class _SalesPageState extends State<SalesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String role = "cashier";
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -88,7 +90,7 @@ class _SalesPageState extends State<SalesPage> {
           ],
         ),
       ),
-      drawer: AppDrawer(role: role),
+      drawer: AppDrawer(role: widget.role),
       body: Row(
         children: [
           Expanded(

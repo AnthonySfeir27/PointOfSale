@@ -2,20 +2,20 @@ import 'product_model.dart';
 
 class UserRef {
   final String id;
-  final String? name;
-  final String? email;
+  final String? username;
+  final String? role;
 
   UserRef({
     required this.id,
-    this.name,
-    this.email,
+    this.username,
+    this.role,
   });
 
   factory UserRef.fromJson(Map<String, dynamic> json) {
     return UserRef(
-      id: json['_id'],
-      name: json['name'],
-      email: json['email'],
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      username: json['username']?.toString(),
+      role: json['role']?.toString(),
     );
   }
 }
@@ -32,7 +32,7 @@ class SaleItem {
   factory SaleItem.fromJson(Map<String, dynamic> json) {
     return SaleItem(
       product: Product.fromJson(json['product']),
-      quantity: json['quantity'],
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -61,14 +61,31 @@ class Sale {
   });
 
   factory Sale.fromJson(Map<String, dynamic> json) {
+    // Safe date parsing - handles both String and Date objects
+    DateTime parseDate(dynamic dateValue) {
+      if (dateValue == null) return DateTime.now();
+      if (dateValue is String) {
+        try {
+          return DateTime.parse(dateValue);
+        } catch (e) {
+          return DateTime.now();
+        }
+      }
+      if (dateValue is DateTime) return dateValue;
+      // If it's a number (timestamp), convert it
+      if (dateValue is int) return DateTime.fromMillisecondsSinceEpoch(dateValue);
+      return DateTime.now();
+    }
+
     return Sale(
-      id: json['_id'],
-      products: (json['products'] as List)
-          .map((e) => SaleItem.fromJson(e))
-          .toList(),
-      cashier: UserRef.fromJson(json['cashier']),
-      total: (json['total'] as num).toDouble(),
-      date: DateTime.parse(json['date']),
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      products: (json['products'] as List?)
+              ?.map((e) => SaleItem.fromJson(e))
+              .toList() ??
+          [],
+      cashier: UserRef.fromJson(json['cashier'] ?? {}),
+      total: (json['total'] as num?)?.toDouble() ?? 0.0,
+      date: parseDate(json['date']),
     );
   }
 

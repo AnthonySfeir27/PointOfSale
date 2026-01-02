@@ -15,7 +15,9 @@ class SaleService {
     if (response.statusCode == 201) {
       return Sale.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception(jsonDecode(response.body)['error']);
+      final errorBody = jsonDecode(response.body);
+      final errorMessage = errorBody['error']?.toString() ?? 'Failed to create sale';
+      throw Exception(errorMessage);
     }
   }
 

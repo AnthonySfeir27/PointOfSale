@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
-import 'home_page.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -29,11 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (res != null && res['user'] != null) {
       final user = res['user'];
-      Navigator.pushReplacement(
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(
-          builder: (_) => HomePage(role: user['role']),
-        ),
+        '/home',
+        arguments: user['role'],
       );
     } else {
       setState(() { _error = res?['error'] ?? 'Login failed'; });

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:point_of_sale/screens/app_drawer.dart'; // 1. Import the shared AppDrawer
+import 'app_drawer.dart';
 
 class HomePage extends StatelessWidget {
   final String role;
@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
       if (role == 'admin' || role == 'cashier') {
         cards.add(buildCard(context, 'Sales', Icons.shopping_cart, () {
           // Also make the card navigate to the sales page
-          Navigator.pushNamed(context, '/sales');
+          Navigator.pushNamed(context, '/sales', arguments: role);
         }));
       }
 
