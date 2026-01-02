@@ -124,10 +124,10 @@ class _SalesPageState extends State<SalesPage> {
                 return GridView.builder(
                   padding: const EdgeInsets.all(8.0),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                    crossAxisCount: 5,
                     crossAxisSpacing: 8.0,
                     mainAxisSpacing: 8.0,
-                    childAspectRatio: 3 / 2,
+                    childAspectRatio: 1 / 1,
                   ),
                   itemCount: _filteredProducts.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -141,11 +141,11 @@ class _SalesPageState extends State<SalesPage> {
                         },
                         child: Center(
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(4.0),
                             child: Text(
                               product.name,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 18.0),
+                              style: const TextStyle(fontSize: 14.0),
                             ),
                           ),
                         ),
