@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/product_model.dart';
 
 class ProductService {
-  static const String baseUrl = 'http://YOUR_IP:3000/products';
+  static const String baseUrl = 'http://localhost:5000/products';
 
   static Future<Product> createProduct(Product product) async {
     final response = await http.post(

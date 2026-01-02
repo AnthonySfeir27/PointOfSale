@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/sale_model.dart';
 
 class SaleService {
-  static const String baseUrl = 'http://YOUR_IP:3000/sales';
+  static const String baseUrl = 'http://localhost:5000/sales';
 
   static Future<Sale> createSale(Sale sale) async {
     final response = await http.post(
