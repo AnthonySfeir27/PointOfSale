@@ -62,7 +62,11 @@ class AppDrawer extends StatelessWidget {
               title: const Text('Sales'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushReplacementNamed(context, '/sales', arguments: role);
+                Navigator.pushReplacementNamed(
+                  context,
+                  '/sales',
+                  arguments: role,
+                );
               },
             ),
           ListTile(

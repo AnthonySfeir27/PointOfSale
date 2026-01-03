@@ -4,10 +4,19 @@ import 'package:flutter/material.dart';
 import 'app_drawer.dart';
 import '../models/product_model.dart';
 import '../services/product_service.dart';
+import '../services/sale_service.dart';
 
 class SalesPage extends StatefulWidget {
   final String role;
-  const SalesPage({super.key, required this.role});
+  final ProductService productService;
+  final SaleService saleService;
+
+  const SalesPage({
+    super.key,
+    required this.role,
+    required this.productService,
+    required this.saleService,
+  });
 
   @override
   _SalesPageState createState() => _SalesPageState();
@@ -40,7 +49,7 @@ class _SalesPageState extends State<SalesPage> {
   // Use a separate async method for better state management in initState
   Future<List<Product>> _initializeProducts() async {
     // This fetches all products initially.
-    final products = await ProductService.getAllProducts();
+    final products = await widget.productService.getAllProducts();
     _allProducts = products; // Store them
     _filterProducts(); // Apply the initial filter
     return products;
@@ -80,7 +89,9 @@ class _SalesPageState extends State<SalesPage> {
                 }
               },
               // Build dropdown items from the Map's keys
-              items: _categories.keys.map<DropdownMenuItem<String>>((String key) {
+              items: _categories.keys.map<DropdownMenuItem<String>>((
+                String key,
+              ) {
                 return DropdownMenuItem<String>(
                   value: key,
                   child: Text(key), // Display the user-friendly key
@@ -120,7 +131,9 @@ class _SalesPageState extends State<SalesPage> {
                 // **FIX 3:** Display the GridView directly if data is ready.
                 // The filtering is now handled by _filterProducts().
                 if (_filteredProducts.isEmpty && _allProducts.isNotEmpty) {
-                  return const Center(child: Text('No products match this category.'));
+                  return const Center(
+                    child: Text('No products match this category.'),
+                  );
                 }
 
                 return GridView.builder(
@@ -138,7 +151,9 @@ class _SalesPageState extends State<SalesPage> {
                       elevation: 2.0,
                       child: InkWell(
                         onTap: () {
-                          print('${product.name} (Price: \$${product.price}) selected');
+                          print(
+                            '${product.name} (Price: \$${product.price}) selected',
+                          );
                           // TODO: Add product to the ticket
                         },
                         child: Center(

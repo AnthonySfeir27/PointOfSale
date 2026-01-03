@@ -3,9 +3,11 @@ import 'package:http/http.dart' as http;
 import '../models/product_model.dart';
 
 class ProductService {
-  static const String baseUrl = 'http://localhost:5000/products';
+  final String baseUrl;
 
-  static Future<Product> createProduct(Product product) async {
+  ProductService({required this.baseUrl});
+
+  Future<Product> createProduct(Product product) async {
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
@@ -19,7 +21,7 @@ class ProductService {
     }
   }
 
-  static Future<List<Product>> getAllProducts() async {
+  Future<List<Product>> getAllProducts() async {
     final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
@@ -30,7 +32,7 @@ class ProductService {
     }
   }
 
-  static Future<Product> getProductById(String id) async {
+  Future<Product> getProductById(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/$id'));
 
     if (response.statusCode == 200) {
@@ -40,7 +42,7 @@ class ProductService {
     }
   }
 
-  static Future<List<Product>> filterProducts({
+  Future<List<Product>> filterProducts({
     String? category,
     bool? inStock,
   }) async {
@@ -59,7 +61,7 @@ class ProductService {
     }
   }
 
-  static Future<Product> updateProduct(String id, Product product) async {
+  Future<Product> updateProduct(String id, Product product) async {
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -73,7 +75,7 @@ class ProductService {
     }
   }
 
-  static Future<void> deleteProduct(String id) async {
+  Future<void> deleteProduct(String id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
 
     if (response.statusCode != 200) {
@@ -81,14 +83,13 @@ class ProductService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getStockValueByCategory() async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/aggregate/stock-value'));
+  Future<List<Map<String, dynamic>>> getStockValueByCategory() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/aggregate/stock-value'),
+    );
 
     if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(
-        jsonDecode(response.body),
-      );
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
     } else {
       throw Exception('Failed to aggregate stock value');
     }

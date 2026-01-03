@@ -3,9 +3,11 @@ import 'package:http/http.dart' as http;
 import '../models/sale_model.dart';
 
 class SaleService {
-  static const String baseUrl = 'http://localhost:5000/sales';
+  final String baseUrl;
 
-  static Future<Sale> createSale(Sale sale) async {
+  SaleService({required this.baseUrl});
+
+  Future<Sale> createSale(Sale sale) async {
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
@@ -16,12 +18,13 @@ class SaleService {
       return Sale.fromJson(jsonDecode(response.body));
     } else {
       final errorBody = jsonDecode(response.body);
-      final errorMessage = errorBody['error']?.toString() ?? 'Failed to create sale';
+      final errorMessage =
+          errorBody['error']?.toString() ?? 'Failed to create sale';
       throw Exception(errorMessage);
     }
   }
 
-  static Future<List<Sale>> getSales() async {
+  Future<List<Sale>> getSales() async {
     final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
@@ -32,7 +35,7 @@ class SaleService {
     }
   }
 
-  static Future<Sale> getSaleById(String id) async {
+  Future<Sale> getSaleById(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/$id'));
 
     if (response.statusCode == 200) {
@@ -42,7 +45,7 @@ class SaleService {
     }
   }
 
-  static Future<Sale> updateSale(String id, Sale sale) async {
+  Future<Sale> updateSale(String id, Sale sale) async {
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -56,7 +59,7 @@ class SaleService {
     }
   }
 
-  static Future<void> deleteSale(String id) async {
+  Future<void> deleteSale(String id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
 
     if (response.statusCode != 200) {
@@ -64,14 +67,11 @@ class SaleService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> salesByProduct() async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/aggregate/products'));
+  Future<List<Map<String, dynamic>>> salesByProduct() async {
+    final response = await http.get(Uri.parse('$baseUrl/aggregate/products'));
 
     if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(
-        jsonDecode(response.body),
-      );
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
     } else {
       throw Exception('Failed to aggregate sales');
     }
