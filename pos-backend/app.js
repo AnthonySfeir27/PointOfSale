@@ -18,6 +18,7 @@ app.get("/", (req, res) => {
 app.use("/products", require("./routes/productRoutes"));
 app.use("/users", require("./routes/userRoutes"));
 app.use("/sales", require("./routes/saleRoutes"));
+app.use("/api/analytics", require("./routes/analyticsRoutes"));
 
 //Connection and Server Start
 mongoose.connect(process.env.MONGO_URL)

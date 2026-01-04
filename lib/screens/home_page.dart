@@ -7,34 +7,37 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     Widget buildDashboard() {
       List<Widget> cards = [];
 
-
-      cards.add(buildCard(context, 'Products', Icons.store));
-
-
-      if (role == 'admin') cards.add(buildCard(context, 'Inventory', Icons.inventory));
-
+      cards.add(
+        buildCard(context, 'Products', Icons.store, () {
+          Navigator.pushNamed(context, '/products');
+        }),
+      );
 
       if (role == 'admin') cards.add(buildCard(context, 'Users', Icons.people));
-
-      if (role == 'admin' || role == 'cashier') {
-        cards.add(buildCard(context, 'Sales', Icons.shopping_cart, () {
-          // Also make the card navigate to the sales page
-          Navigator.pushNamed(context, '/sales', arguments: role);
-        }));
+      if (role == 'admin') {
+        cards.add(
+          buildCard(context, 'Analytics', Icons.analytics, () {
+            Navigator.pushNamed(context, '/dashboard');
+          }),
+        );
       }
 
       if (role == 'admin' || role == 'cashier') {
-        cards.add(buildCard(context, 'Transactions', Icons.receipt));
+        cards.add(
+          buildCard(context, 'Sales', Icons.shopping_cart, () {
+            // Also make the card navigate to the sales page
+            Navigator.pushNamed(context, '/sales', arguments: role);
+          }),
+        );
       }
 
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.count(
-          crossAxisCount: 2,
+          crossAxisCount: 4,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
           children: cards,
@@ -58,13 +61,20 @@ class HomePage extends StatelessWidget {
   */
 
   // I've updated buildCard to accept an onTap callback
-  Widget buildCard(BuildContext context, String title, IconData icon, [VoidCallback? onTap]) {
+  Widget buildCard(
+    BuildContext context,
+    String title,
+    IconData icon, [
+    VoidCallback? onTap,
+  ]) {
     return Card(
       elevation: 4,
       child: InkWell(
-        onTap: onTap ?? () {
-          print('$title card tapped');
-        },
+        onTap:
+            onTap ??
+            () {
+              print('$title card tapped');
+            },
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,

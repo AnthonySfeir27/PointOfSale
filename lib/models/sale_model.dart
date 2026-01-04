@@ -5,11 +5,7 @@ class UserRef {
   final String? username;
   final String? role;
 
-  UserRef({
-    required this.id,
-    this.username,
-    this.role,
-  });
+  UserRef({required this.id, this.username, this.role});
 
   factory UserRef.fromJson(Map<String, dynamic> json) {
     return UserRef(
@@ -24,10 +20,7 @@ class SaleItem {
   final Product product;
   final int quantity;
 
-  SaleItem({
-    required this.product,
-    required this.quantity,
-  });
+  SaleItem({required this.product, required this.quantity});
 
   factory SaleItem.fromJson(Map<String, dynamic> json) {
     return SaleItem(
@@ -37,10 +30,7 @@ class SaleItem {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'product': product.id,
-      'quantity': quantity,
-    };
+    return {'product': product.id, 'quantity': quantity};
   }
 }
 
@@ -73,13 +63,15 @@ class Sale {
       }
       if (dateValue is DateTime) return dateValue;
       // If it's a number (timestamp), convert it
-      if (dateValue is int) return DateTime.fromMillisecondsSinceEpoch(dateValue);
+      if (dateValue is int)
+        return DateTime.fromMillisecondsSinceEpoch(dateValue);
       return DateTime.now();
     }
 
     return Sale(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      products: (json['products'] as List?)
+      products:
+          (json['products'] as List?)
               ?.map((e) => SaleItem.fromJson(e))
               .toList() ??
           [],

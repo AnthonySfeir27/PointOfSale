@@ -48,7 +48,10 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.store),
             title: const Text('Products'),
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/products');
+            },
           ),
           if (role == 'admin')
             ListTile(

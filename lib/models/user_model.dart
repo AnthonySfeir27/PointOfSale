@@ -32,7 +32,8 @@ class User {
       }
       if (dateValue is DateTime) return dateValue;
       // If it's a number (timestamp), convert it
-      if (dateValue is int) return DateTime.fromMillisecondsSinceEpoch(dateValue);
+      if (dateValue is int)
+        return DateTime.fromMillisecondsSinceEpoch(dateValue);
       return null;
     }
 
@@ -42,8 +43,12 @@ class User {
       role: json['role']?.toString() ?? 'cashier',
       password: json['password']?.toString(),
       createdAt: parseDate(json['createdAt']),
-      preferences: json['preferences'] != null ? List<String>.from(json['preferences']) : [],
-      permissions: json['permissions'] != null ? Map<String, dynamic>.from(json['permissions']) : {},
+      preferences: json['preferences'] != null
+          ? List<String>.from(json['preferences'])
+          : [],
+      permissions: json['permissions'] != null
+          ? Map<String, dynamic>.from(json['permissions'])
+          : {},
       activityLog: json['activityLog'] != null
           ? List<Map<String, dynamic>>.from(json['activityLog'])
           : [],

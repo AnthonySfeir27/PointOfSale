@@ -2,7 +2,8 @@
 
 class Product {
   final String id;
-  final String name;  final String category;
+  final String name;
+  final String category;
   final double price;
   final bool inStock;
   final int stockQuantity;
@@ -35,7 +36,8 @@ class Product {
       }
       if (dateValue is DateTime) return dateValue;
       // If it's a number (timestamp), convert it
-      if (dateValue is int) return DateTime.fromMillisecondsSinceEpoch(dateValue);
+      if (dateValue is int)
+        return DateTime.fromMillisecondsSinceEpoch(dateValue);
       return DateTime.now();
     }
 
