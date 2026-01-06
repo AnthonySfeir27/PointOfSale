@@ -7,8 +7,6 @@ class Product {
   final double price;
   final bool inStock;
   final int stockQuantity;
-  final List<String> tags;
-  final Map<String, dynamic>? details;
   final DateTime createdAt;
 
   Product({
@@ -18,8 +16,6 @@ class Product {
     required this.price,
     required this.inStock,
     required this.stockQuantity,
-    required this.tags,
-    this.details,
     required this.createdAt,
   });
 
@@ -31,7 +27,6 @@ class Product {
       price: 0.0,
       inStock: false,
       stockQuantity: 0,
-      tags: [],
       createdAt: DateTime.now(),
     );
   }
@@ -63,10 +58,6 @@ class Product {
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       inStock: json['inStock'] as bool? ?? true,
       stockQuantity: json['stockQuantity'] as int? ?? 0,
-      tags: List<String>.from(json['tags'] as List? ?? []),
-      details: json['details'] != null
-          ? Map<String, dynamic>.from(json['details'])
-          : null,
       createdAt: parseDate(json['createdAt']),
     );
   }
@@ -78,8 +69,6 @@ class Product {
       'price': price,
       'inStock': inStock,
       'stockQuantity': stockQuantity,
-      'tags': tags,
-      'details': details,
     };
   }
 }

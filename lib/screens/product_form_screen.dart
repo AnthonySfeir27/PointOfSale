@@ -70,7 +70,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         price: double.parse(_priceController.text),
         inStock: int.parse(_stockController.text) > 0,
         stockQuantity: int.parse(_stockController.text),
-        tags: [], // Optional: add tags input later
         createdAt: DateTime.now(), // Ignored on update
       );
 

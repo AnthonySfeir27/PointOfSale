@@ -4,9 +4,6 @@ class User {
   final String role;
   final String? password;
   final DateTime? createdAt;
-  final List<String>? preferences;
-  final Map<String, dynamic>? permissions;
-  final List<Map<String, dynamic>>? activityLog;
 
   User({
     this.id,
@@ -14,9 +11,6 @@ class User {
     required this.role,
     this.password,
     this.createdAt,
-    this.preferences,
-    this.permissions,
-    this.activityLog,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -43,26 +37,10 @@ class User {
       role: json['role']?.toString() ?? 'cashier',
       password: json['password']?.toString(),
       createdAt: parseDate(json['createdAt']),
-      preferences: json['preferences'] != null
-          ? List<String>.from(json['preferences'])
-          : [],
-      permissions: json['permissions'] != null
-          ? Map<String, dynamic>.from(json['permissions'])
-          : {},
-      activityLog: json['activityLog'] != null
-          ? List<Map<String, dynamic>>.from(json['activityLog'])
-          : [],
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'username': username,
-      'role': role,
-      'password': password,
-      'preferences': preferences,
-      'permissions': permissions,
-      'activityLog': activityLog,
-    };
+    return {'username': username, 'role': role, 'password': password};
   }
 }
