@@ -166,7 +166,13 @@ class _UserFormScreenState extends State<UserFormScreen> {
             children: [
               TextFormField(
                 controller: _usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: const Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter a username' : null,
               ),
@@ -177,6 +183,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   labelText: isEditing
                       ? 'Password (leave blank to keep current)'
                       : 'Password',
+                  prefixIcon: const Icon(Icons.lock),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 obscureText: true,
               ),
@@ -184,7 +194,13 @@ class _UserFormScreenState extends State<UserFormScreen> {
               DropdownButtonFormField<String>(
                 key: ValueKey('role_$_roleVersion'),
                 value: _role,
-                decoration: const InputDecoration(labelText: 'Role'),
+                decoration: InputDecoration(
+                  labelText: 'Role',
+                  prefixIcon: const Icon(Icons.work),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 items: _roles
                     .map(
                       (r) => DropdownMenuItem(
