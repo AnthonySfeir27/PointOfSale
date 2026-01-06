@@ -13,20 +13,73 @@ exports.getDashboardStats = async (req, res) => {
     const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].totalRevenue : 0;
 
     // 3. Low Stock Items (stockQuantity < 5)
-    // Assuming 'stockQuantity' is the field name in Product model
     const lowStockCount = await Product.countDocuments({ stockQuantity: { $lt: 5 } });
 
     // 4. Recent Transactions (Limit 5, sort by date desc)
+    // Populate with 'username' field since User model uses 'username', not 'name'
     const recentTransactions = await Sale.find()
       .sort({ date: -1 })
       .limit(5)
-      .populate("cashier", "name email"); // Populate cashier info if available
+      .populate("cashier", "username role");
+
+    // 5. Daily aggregated data for charts (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const dailyData = await Sale.aggregate([
+      {
+        $match: {
+          date: { $gte: sevenDaysAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$date" },
+            month: { $month: "$date" },
+            day: { $dayOfMonth: "$date" }
+          },
+          salesCount: { $sum: 1 },
+          revenue: { $sum: "$total" }
+        }
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 }
+      }
+    ]);
+
+    // Build array for last 7 days with zeros for missing days
+    const chartLabels = [];
+    const dailySalesData = [];
+    const dailyRevenueData = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+
+      const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' });
+      chartLabels.push(dayLabel);
+
+      const found = dailyData.find(
+        d => d._id.year === year && d._id.month === month && d._id.day === day
+      );
+
+      dailySalesData.push(found ? found.salesCount : 0);
+      dailyRevenueData.push(found ? found.revenue : 0);
+    }
 
     res.json({
       totalSales,
       totalRevenue,
       lowStockCount,
-      recentTransactions
+      recentTransactions,
+      chartLabels,
+      dailySalesData,
+      dailyRevenueData
     });
   } catch (error) {
     console.error("Dashboard Stats Error:", error);
