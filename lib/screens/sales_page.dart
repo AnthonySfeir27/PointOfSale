@@ -6,6 +6,9 @@ import '../services/sale_service.dart';
 import '../models/user_model.dart';
 import '../models/cart_item.dart';
 import '../models/sale_model.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class SalesPage extends StatefulWidget {
   final User user;
@@ -205,15 +208,7 @@ class _SalesPageState extends State<SalesPage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Printing functionality coming soon...',
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: () => _printReceipt(sale),
                         icon: const Icon(Icons.print),
                         label: const Text('Print'),
                         style: OutlinedButton.styleFrom(
@@ -245,6 +240,107 @@ class _SalesPageState extends State<SalesPage> {
         );
       },
     );
+  }
+
+  Future<void> _printReceipt(Sale sale) async {
+    try {
+      final pdf = pw.Document();
+      // Safe date formatting
+      final String dateStr = sale.date.toString();
+      final String dateFormat = dateStr.length >= 16
+          ? dateStr.substring(0, 16)
+          : dateStr;
+
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.roll80,
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Center(
+                  child: pw.Text(
+                    'SUPERMARKET POS',
+                    style: pw.TextStyle(
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+                pw.Center(child: pw.Text('Store #1234 - Tel: 01-234567')),
+                pw.Divider(),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Date: $dateFormat'),
+                    pw.Text('Cashier: ${sale.cashier.username ?? "N/A"}'),
+                  ],
+                ),
+                pw.SizedBox(height: 10),
+                pw.Table(
+                  columnWidths: {
+                    0: const pw.FlexColumnWidth(3),
+                    1: const pw.FlexColumnWidth(1),
+                  },
+                  children: [
+                    ...sale.products.map(
+                      (item) => pw.TableRow(
+                        children: [
+                          pw.Text('${item.quantity}x ${item.product.name}'),
+                          pw.Align(
+                            alignment: pw.Alignment.centerRight,
+                            child: pw.Text(
+                              '\$${(item.product.price * item.quantity).toStringAsFixed(2)}',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Divider(),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      'TOTAL',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      '\$${sale.total.toStringAsFixed(2)}',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 10),
+                pw.Center(child: pw.Text('Thank you for your visit!')),
+              ],
+            );
+          },
+        ),
+      );
+
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: 'Receipt_${sale.id}',
+      );
+    } catch (e) {
+      debugPrint('Printing error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Printing failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _chargerOrPark({bool isParking = false}) async {
@@ -321,7 +417,9 @@ class _SalesPageState extends State<SalesPage> {
           title: const Text('Name this Ticket'),
           content: TextField(
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'e.g. Table 5'),
+            decoration: const InputDecoration(
+              hintText: 'e.g. Basket A or Customer Name',
+            ),
             onChanged: (value) => name = value,
           ),
           actions: [
