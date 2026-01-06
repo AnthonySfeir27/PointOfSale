@@ -188,15 +188,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final chartBgColor = isDarkMode ? const Color(0xFF1B1A23) : Colors.white;
+    final shadowColor = isDarkMode
+        ? Colors.black45
+        : Colors.grey.withOpacity(0.15);
+    final axisLabelStyle = LabelStyle(
+      textStyle: TextStyle(
+        color: isDarkMode ? Colors.white70 : Colors.black87,
+        fontSize: 10,
+      ),
+    );
+
     return Container(
       height: 220,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: chartBgColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: shadowColor,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -214,7 +226,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             size: SizeEncode(value: 20),
           ),
         ],
-        axes: [Defaults.horizontalAxis, Defaults.verticalAxis],
+        axes: [
+          Defaults.horizontalAxis..label = axisLabelStyle,
+          Defaults.verticalAxis..label = axisLabelStyle,
+        ],
       ),
     );
   }
@@ -236,15 +251,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final chartBgColor = isDarkMode ? const Color(0xFF1B1A23) : Colors.white;
+    final shadowColor = isDarkMode
+        ? Colors.black45
+        : Colors.grey.withOpacity(0.15);
+    final axisLabelStyle = LabelStyle(
+      textStyle: TextStyle(
+        color: isDarkMode ? Colors.white70 : Colors.black87,
+        fontSize: 10,
+      ),
+    );
+
     return Container(
       height: 220,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: chartBgColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: shadowColor,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -266,7 +293,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             size: SizeEncode(value: 6),
           ),
         ],
-        axes: [Defaults.horizontalAxis, Defaults.verticalAxis],
+        axes: [
+          Defaults.horizontalAxis..label = axisLabelStyle,
+          Defaults.verticalAxis..label = axisLabelStyle,
+        ],
       ),
     );
   }
