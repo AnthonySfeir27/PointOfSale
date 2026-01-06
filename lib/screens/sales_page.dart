@@ -29,6 +29,7 @@ class _SalesPageState extends State<SalesPage> {
   List<Product> _filteredProducts = [];
   final List<CartItem> _cartItems = [];
   bool _processingSale = false;
+  String? _currentSaleId;
 
   final Map<String, String> _categories = {
     'All': 'All',
@@ -84,18 +85,91 @@ class _SalesPageState extends State<SalesPage> {
     });
   }
 
+  void _decrementCartItem(int index) {
+    setState(() {
+      if (_cartItems[index].quantity > 1) {
+        _cartItems[index].quantity--;
+      } else {
+        _cartItems.removeAt(index);
+      }
+    });
+  }
+
   double _calculateTotal() {
     return _cartItems.fold(0, (sum, item) => sum + item.totalPrice);
   }
 
-  Future<void> _charge() async {
+  Future<void> _showSaleCompletedDialog(double total) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Column(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.green, size: 60),
+              SizedBox(height: 16),
+              Text('Sale Completed'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('The transaction was successful.'),
+              const SizedBox(height: 8),
+              Text(
+                'Total: \$${total.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'The ticket has been cleared.',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Text('OK'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _chargerOrPark({bool isParking = false}) async {
     if (_cartItems.isEmpty) return;
+
+    String? ticketName;
+    if (isParking) {
+      ticketName = await _showTicketNameDialog();
+      if (ticketName == null) return; // User cancelled
+    }
 
     setState(() => _processingSale = true);
 
     try {
+      final total = _calculateTotal();
       final sale = Sale(
-        id: '', // Backend generates ID
+        id: _currentSaleId ?? '',
         products: _cartItems
             .map(
               (item) =>
@@ -107,27 +181,203 @@ class _SalesPageState extends State<SalesPage> {
           username: widget.user.username,
           role: widget.user.role,
         ),
-        total: _calculateTotal(),
+        total: total,
         date: DateTime.now(),
+        isParked: isParking,
+        ticketName: ticketName,
       );
 
-      await widget.saleService.createSale(sale);
+      if (_currentSaleId != null) {
+        await widget.saleService.updateSale(_currentSaleId!, sale);
+      } else {
+        await widget.saleService.createSale(sale);
+      }
 
       setState(() {
         _cartItems.clear();
+        _currentSaleId = null;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sale completed successfully!')),
-      );
+      if (isParking) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ticket parked successfully!')),
+        );
+      } else {
+        await _showSaleCompletedDialog(total);
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to process sale: $e')));
+      ).showSnackBar(SnackBar(content: Text('Failed: $e')));
     } finally {
       setState(() => _processingSale = false);
     }
   }
+
+  Future<String?> _showTicketNameDialog() async {
+    String name = '';
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Name this Ticket'),
+          content: TextField(
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'e.g. Table 5'),
+            onChanged: (value) => name = value,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, name),
+              child: const Text('Park'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteParkedSale(String id, List<Sale> list) async {
+    try {
+      await widget.saleService.deleteSale(id);
+      list.removeWhere((s) => s.id == id);
+      setState(() {});
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Parked ticket deleted.')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+    }
+  }
+
+  Future<void> _showParkedSalesDialog() async {
+    setState(() => _processingSale = true);
+    try {
+      final parkedSales = await widget.saleService.getSales(isParked: true);
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return StatefulBuilder(
+              builder: (context, setDialogState) {
+                return AlertDialog(
+                  title: const Text('Parked Tickets'),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: parkedSales.isEmpty
+                        ? const Text("No parked tickets found.")
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: parkedSales.length,
+                            itemBuilder: (context, index) {
+                              final sale = parkedSales[index];
+                              return ListTile(
+                                leading: const Icon(
+                                  Icons.receipt_long,
+                                  color: Colors.orange,
+                                ),
+                                title: Text(
+                                  sale.ticketName ??
+                                      'Unnamed Ticket #${sale.id.substring(sale.id.length - 4)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Total: \$${sale.total.toStringAsFixed(2)}\n${sale.date.toString().substring(0, 16)}',
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text('Delete Ticket?'),
+                                        content: const Text(
+                                          'Are you sure you want to discard this parked ticket?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, false),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, true),
+                                            child: const Text(
+                                              'Delete',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirm == true) {
+                                      await _deleteParkedSale(
+                                        sale.id,
+                                        parkedSales,
+                                      );
+                                      setDialogState(() {});
+                                    }
+                                  },
+                                ),
+                                isThreeLine: true,
+                                onTap: () {
+                                  setState(() {
+                                    _cartItems.clear();
+                                    for (var item in sale.products) {
+                                      _cartItems.add(
+                                        CartItem(
+                                          product: item.product,
+                                          quantity: item.quantity,
+                                        ),
+                                      );
+                                    }
+                                    _currentSaleId = sale.id;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load tickets: $e')));
+      }
+    } finally {
+      setState(() => _processingSale = false);
+    }
+  }
+
+  Future<void> _charge() => _chargerOrPark(isParking: false);
+  Future<void> _park() => _chargerOrPark(isParking: true);
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +405,13 @@ class _SalesPageState extends State<SalesPage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Parked Tickets',
+            onPressed: _showParkedSalesDialog,
+          ),
+        ],
       ),
       drawer: AppDrawer(user: widget.user),
       body: Row(
@@ -276,6 +533,14 @@ class _SalesPageState extends State<SalesPage> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      color: Colors.orange,
+                                    ),
+                                    onPressed: () => _decrementCartItem(index),
+                                  ),
                                   IconButton(
                                     icon: const Icon(
                                       Icons.delete,
@@ -326,16 +591,29 @@ class _SalesPageState extends State<SalesPage> {
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
+                        height: 40,
+                        child: OutlinedButton.icon(
+                          onPressed: _cartItems.isEmpty || _processingSale
+                              ? null
+                              : _park,
+                          icon: const Icon(Icons.pause),
+                          label: const Text("PARK TICKET"),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.orange,
+                            side: const BorderSide(color: Colors.orange),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
+                        child: ElevatedButton.icon(
                           onPressed: _cartItems.isEmpty || _processingSale
                               ? null
                               : _charge,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: _processingSale
+                          icon: const Icon(Icons.check),
+                          label: _processingSale
                               ? const CircularProgressIndicator(
                                   color: Colors.white,
                                 )
@@ -346,6 +624,10 @@ class _SalesPageState extends State<SalesPage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
                       ),
                     ],

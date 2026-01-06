@@ -13,9 +13,75 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  int _roleVersion = 0;
   String _role = 'cashier';
   bool _loading = false;
   String? _error;
+
+  Future<void> _handleRoleChange(String? newRole) async {
+    if (newRole == null) return;
+    String previousRole = _role;
+
+    // If selecting admin, verify secret
+    if (newRole == 'admin' && _role != 'admin') {
+      final secretVerified = await _showAdminSecretDialog();
+      if (secretVerified) {
+        setState(() => _role = 'admin');
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Admin verification failed')),
+          );
+        }
+        // Force reset the role to the previous value to update the UI
+        setState(() {
+          _role = previousRole;
+          _roleVersion++;
+        });
+      }
+    } else {
+      setState(() => _role = newRole);
+    }
+  }
+
+  Future<bool> _showAdminSecretDialog() async {
+    String enteredSecret = '';
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Admin Verification'),
+              content: TextField(
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Enter Secret Admin Password',
+                  hintText: 'Required to assign admin role',
+                ),
+                onChanged: (value) => enteredSecret = value,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final isValid = await widget.userService.verifyAdminSecret(
+                      enteredSecret,
+                    );
+                    if (context.mounted) {
+                      Navigator.pop(context, isValid);
+                    }
+                  },
+                  child: const Text('Verify'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
 
   void _signup() async {
     setState(() {
@@ -101,6 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       const SizedBox(height: 20),
                       DropdownButtonFormField<String>(
+                        key: ValueKey('role_$_roleVersion'),
                         value: _role,
                         decoration: InputDecoration(
                           labelText: 'Role',
@@ -119,9 +186,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             child: Text('Cashier'),
                           ),
                         ],
-                        onChanged: (v) => setState(() {
-                          _role = v!;
-                        }),
+                        onChanged: _handleRoleChange,
                       ),
                       const SizedBox(height: 20),
                       if (_error != null)

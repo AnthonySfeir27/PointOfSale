@@ -44,10 +44,12 @@ class ProductService {
 
   Future<List<Product>> filterProducts({
     String? category,
+    String? name,
     bool? inStock,
   }) async {
     final query = <String, String>{};
     if (category != null) query['category'] = category;
+    if (name != null && name.isNotEmpty) query['name'] = name;
     if (inStock != null) query['inStock'] = inStock.toString();
 
     final uri = Uri.parse('$baseUrl/filter').replace(queryParameters: query);

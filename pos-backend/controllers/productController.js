@@ -31,10 +31,11 @@ exports.getProductById = async (req, res) => {
 
 exports.filterProducts = async (req, res) => {
   try {
-    const { category, inStock } = req.query;
+    const { category, inStock, name } = req.query;
     const filter = {};
     if (category) filter.category = category;
     if (inStock !== undefined) filter.inStock = inStock === "true";
+    if (name) filter.name = { $regex: name, $options: "i" };
     const products = await Product.find(filter);
     res.json(products);
   } catch (err) {

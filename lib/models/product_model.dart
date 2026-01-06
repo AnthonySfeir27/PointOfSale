@@ -23,7 +23,21 @@ class Product {
     required this.createdAt,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) {
+  factory Product.empty() {
+    return Product(
+      id: '',
+      name: 'Unknown Product',
+      category: 'other',
+      price: 0.0,
+      inStock: false,
+      stockQuantity: 0,
+      tags: [],
+      createdAt: DateTime.now(),
+    );
+  }
+
+  factory Product.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return Product.empty();
     // Safe date parsing - handles both String and Date objects
     DateTime parseDate(dynamic dateValue) {
       if (dateValue == null) return DateTime.now();

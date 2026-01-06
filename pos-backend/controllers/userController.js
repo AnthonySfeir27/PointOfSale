@@ -5,9 +5,9 @@ const bcrypt = require("bcrypt");
 //its on create  /users/
 exports.createUser = async (req, res) => {
   try {
-     console.log("Creating user:", req.body);
+    console.log("Creating user:", req.body);
     const user = await User.create(req.body);
-    res.status(201).json(user); 
+    res.status(201).json(user);
   } catch (err) {
     console.error("Error in createUser:", err);
     res.status(400).json({ error: err.message });
@@ -17,8 +17,12 @@ exports.createUser = async (req, res) => {
 //returns all users, its on get /users/
 exports.getUsers = async (req, res) => {
   try {
-    const { role } = req.query;
-    const users = role ? await User.find({ role }) : await User.find();
+    const { role, username } = req.query;
+    const filter = {};
+    if (role) filter.role = role;
+    if (username) filter.username = { $regex: username, $options: "i" };
+
+    const users = await User.find(filter);
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -86,6 +90,22 @@ exports.deleteUser = async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json({ message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Verify admin secret for role assignment
+exports.verifyAdminSecret = async (req, res) => {
+  try {
+    const { secret } = req.body;
+    const adminSecret = process.env.ADMIN_SECRET || "123456";
+
+    if (secret === adminSecret) {
+      res.json({ success: true, message: "Admin secret verified" });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid admin secret" });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

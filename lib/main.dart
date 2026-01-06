@@ -9,6 +9,7 @@ import 'screens/sales_page.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/product_list_screen.dart';
 import 'screens/product_form_screen.dart';
+import 'screens/user_list_screen.dart';
 import 'models/product_model.dart';
 import 'models/user_model.dart';
 import 'services/analytics_service.dart';
@@ -42,6 +43,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (_) => LoginScreen(userService: userService),
         '/signup': (_) => SignupScreen(userService: userService),
+        '/users': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final user = args is User ? args : null;
+          return UserListScreen(userService: userService, currentUser: user);
+        },
         '/dashboard': (_) =>
             DashboardScreen(analyticsService: analyticsService),
         '/products': (_) => ProductListScreen(productService: productService),

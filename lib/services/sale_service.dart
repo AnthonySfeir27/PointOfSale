@@ -24,8 +24,13 @@ class SaleService {
     }
   }
 
-  Future<List<Sale>> getSales() async {
-    final response = await http.get(Uri.parse(baseUrl));
+  Future<List<Sale>> getSales({bool? isParked}) async {
+    final uri = Uri.parse(baseUrl).replace(
+      queryParameters: isParked != null
+          ? {'isParked': isParked.toString()}
+          : null,
+    );
+    final response = await http.get(uri);
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);

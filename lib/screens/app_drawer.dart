@@ -52,7 +52,14 @@ class AppDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.people),
               title: const Text('Users'),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacementNamed(
+                  context,
+                  '/users',
+                  arguments: user,
+                );
+              },
             ),
           if (user.role == 'admin' || user.role == 'cashier')
             ListTile(

@@ -5,29 +5,32 @@ const User = require("../models/User");
 
 exports.createSale = async (req, res) => {
   try {
-    const { products, cashier, total } = req.body;
+    const { products, cashier, total, isParked, ticketName } = req.body;
 
 
     const cashierUser = await User.findById(cashier);
     if (!cashierUser) return res.status(404).json({ error: "Cashier not found" });
 
 
-    for (let item of products) {
-      const product = await Product.findById(item.product);
-      if (!product) return res.status(404).json({ error: `Product ${item.product} not found` });
-      if (item.quantity > product.stockQuantity) {
-        return res.status(400).json({ error: `Not enough stock for product ${product.name}` });
+    // Only check and decrement stock if the sale is NOT parked
+    if (!isParked) {
+      for (let item of products) {
+        const product = await Product.findById(item.product);
+        if (!product) return res.status(404).json({ error: `Product ${item.product} not found` });
+        if (item.quantity > product.stockQuantity) {
+          return res.status(400).json({ error: `Not enough stock for product ${product.name}` });
+        }
+      }
+
+
+      for (let item of products) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stockQuantity: -item.quantity },
+        });
       }
     }
 
-
-    for (let item of products) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stockQuantity: -item.quantity },
-      });
-    }
-
-    const sale = new Sale({ products, cashier, total });
+    const sale = new Sale({ products, cashier, total, isParked, ticketName });
     await sale.save();
 
     const populatedSale = await Sale.findById(sale._id)
@@ -42,7 +45,15 @@ exports.createSale = async (req, res) => {
 
 exports.getSales = async (req, res) => {
   try {
-    const sales = await Sale.find()
+    const { isParked, cashier } = req.query;
+    const filter = {};
+    if (isParked !== undefined) {
+      // Robustly handle both string and boolean forms of query parameters
+      filter.isParked = (isParked === 'true' || isParked === true);
+    }
+    if (cashier) filter.cashier = cashier;
+
+    const sales = await Sale.find(filter)
       .populate("products.product")
       .populate("cashier");
     res.json(sales);
@@ -65,10 +76,42 @@ exports.getSaleById = async (req, res) => {
 
 exports.updateSale = async (req, res) => {
   try {
+    const oldSale = await Sale.findById(req.params.id);
+    if (!oldSale) return res.status(404).json({ error: "Sale not found" });
+
+    // Handle transition from parked to charged
+    // Check both old status string (legacy) and new isParked boolean
+    const wasParked = oldSale.isParked || oldSale.status === 'parked';
+    const becomingCharged = req.body.isParked === false || req.body.status === 'completed';
+
+    if (wasParked && becomingCharged) {
+      // Check stock
+      for (let item of req.body.products || oldSale.products) {
+        const product = await Product.findById(item.product);
+        if (!product) return res.status(404).json({ error: `Product ${item.product} not found` });
+        if (item.quantity > product.stockQuantity) {
+          return res.status(400).json({ error: `Not enough stock for product ${product.name}` });
+        }
+      }
+
+      // Decrement stock
+      for (let item of req.body.products || oldSale.products) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stockQuantity: -item.quantity },
+        });
+      }
+    }
+
+    // Explicitly set fields to ensure transition works even with legacy data
+    if (req.body.isParked === false) {
+      req.body.status = 'completed';
+    } else if (req.body.isParked === true) {
+      req.body.status = 'parked';
+    }
+
     const sale = await Sale.findByIdAndUpdate(req.params.id, req.body, { new: true })
       .populate("products.product")
       .populate("cashier");
-    if (!sale) return res.status(404).json({ error: "Sale not found" });
     res.json(sale);
   } catch (err) {
     res.status(400).json({ error: err.message });
