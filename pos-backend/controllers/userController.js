@@ -1,8 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 
-//creates a user,required to define the username and password and role,the rest is not
-//its on create  /users/
 exports.createUser = async (req, res) => {
   try {
     console.log("Creating user:", req.body);
@@ -14,7 +12,6 @@ exports.createUser = async (req, res) => {
   }
 };
 
-//returns all users, its on get /users/
 exports.getUsers = async (req, res) => {
   try {
     const { role, username } = req.query;
@@ -28,7 +25,7 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-// only one user by id, and its on get /users/copypaste id here
+
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -39,7 +36,6 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-//only one user by name,get /users/username/the username here
 exports.getUserByUsername = async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
@@ -50,8 +46,6 @@ exports.getUserByUsername = async (req, res) => {
   }
 };
 
-//requires the username and pass then it hashes the password and compares it with the stored
-//pass, if they match you get login succesful,on post /users/login
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -67,8 +61,6 @@ exports.login = async (req, res) => {
   }
 };
 
-//add the values u want to change probably gonna modify this cause its not robust enough
-//its on put /users/id here
 exports.updateUser = async (req, res) => {
   try {
     if (req.body.password) {
@@ -84,7 +76,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-//delete a data sample , on delete /users/id here
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -95,7 +86,6 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// Verify admin secret for role assignment
 exports.verifyAdminSecret = async (req, res) => {
   try {
     const { secret } = req.body;

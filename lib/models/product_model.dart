@@ -1,5 +1,3 @@
-// C:/.../point_of_sale/lib/models/product_model.dart
-
 class Product {
   final String id;
   final String name;
@@ -33,7 +31,6 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic>? json) {
     if (json == null) return Product.empty();
-    // Safe date parsing - handles both String and Date objects
     DateTime parseDate(dynamic dateValue) {
       if (dateValue == null) return DateTime.now();
       if (dateValue is String) {
@@ -44,14 +41,12 @@ class Product {
         }
       }
       if (dateValue is DateTime) return dateValue;
-      // If it's a number (timestamp), convert it
       if (dateValue is int)
         return DateTime.fromMillisecondsSinceEpoch(dateValue);
       return DateTime.now();
     }
 
     return Product(
-      // Ensure the _id from MongoDB is correctly handled - safe casting
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       category: json['category']?.toString() ?? 'other',

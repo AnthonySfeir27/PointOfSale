@@ -120,7 +120,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
       if (_passwordController.text.isNotEmpty) {
         userData['password'] = _passwordController.text;
       } else if (widget.user == null) {
-        // Require password for new users
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Password is required for new users')),
         );

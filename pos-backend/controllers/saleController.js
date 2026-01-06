@@ -10,9 +10,6 @@ exports.createSale = async (req, res) => {
 
     const cashierUser = await User.findById(cashier);
     if (!cashierUser) return res.status(404).json({ error: "Cashier not found" });
-
-
-    // Only check and decrement stock if the sale is NOT parked
     if (!isParked) {
       for (let item of products) {
         const product = await Product.findById(item.product);
@@ -48,7 +45,6 @@ exports.getSales = async (req, res) => {
     const { isParked, cashier } = req.query;
     const filter = {};
     if (isParked !== undefined) {
-      // Robustly handle both string and boolean forms of query parameters
       filter.isParked = (isParked === 'true' || isParked === true);
     }
     if (cashier) filter.cashier = cashier;
@@ -78,14 +74,10 @@ exports.updateSale = async (req, res) => {
   try {
     const oldSale = await Sale.findById(req.params.id);
     if (!oldSale) return res.status(404).json({ error: "Sale not found" });
-
-    // Handle transition from parked to charged
-    // Check both old status string (legacy) and new isParked boolean
     const wasParked = oldSale.isParked || oldSale.status === 'parked';
     const becomingCharged = req.body.isParked === false || req.body.status === 'completed';
 
     if (wasParked && becomingCharged) {
-      // Check stock
       for (let item of req.body.products || oldSale.products) {
         const product = await Product.findById(item.product);
         if (!product) return res.status(404).json({ error: `Product ${item.product} not found` });
@@ -93,16 +85,12 @@ exports.updateSale = async (req, res) => {
           return res.status(400).json({ error: `Not enough stock for product ${product.name}` });
         }
       }
-
-      // Decrement stock
       for (let item of req.body.products || oldSale.products) {
         await Product.findByIdAndUpdate(item.product, {
           $inc: { stockQuantity: -item.quantity },
         });
       }
     }
-
-    // Explicitly set fields to ensure transition works even with legacy data
     if (req.body.isParked === false) {
       req.body.status = 'completed';
     } else if (req.body.isParked === true) {

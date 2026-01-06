@@ -245,7 +245,6 @@ class _SalesPageState extends State<SalesPage> {
   Future<void> _printReceipt(Sale sale) async {
     try {
       final pdf = pw.Document();
-      // Safe date formatting
       final String dateStr = sale.date.toString();
       final String dateFormat = dateStr.length >= 16
           ? dateStr.substring(0, 16)
@@ -349,7 +348,7 @@ class _SalesPageState extends State<SalesPage> {
     String? ticketName;
     if (isParking) {
       ticketName = await _showTicketNameDialog();
-      if (ticketName == null) return; // User cancelled
+      if (ticketName == null) return;
     }
 
     setState(() => _processingSale = true);

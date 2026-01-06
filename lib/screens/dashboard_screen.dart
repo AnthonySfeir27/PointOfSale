@@ -64,11 +64,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Summary row with key metrics
                   _buildSummaryRow(stats),
                   const SizedBox(height: 24),
 
-                  // Sales Chart
                   const Text(
                     'Daily Sales (Last 7 Days)',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -77,7 +75,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _buildSalesChart(stats),
                   const SizedBox(height: 24),
 
-                  // Revenue Chart
                   const Text(
                     'Daily Revenue (Last 7 Days)',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -86,7 +83,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _buildRevenueChart(stats),
                   const SizedBox(height: 24),
 
-                  // Recent Transactions
                   const Text(
                     'Recent Transactions',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -179,7 +175,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    // Prepare data for the chart
     final List<Map<String, dynamic>> chartData = [];
     for (int i = 0; i < stats.chartLabels.length; i++) {
       chartData.add({
@@ -242,7 +237,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    // Prepare data for the chart
     final List<Map<String, dynamic>> chartData = [];
     for (int i = 0; i < stats.chartLabels.length; i++) {
       chartData.add({
@@ -316,11 +310,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final date = DateTime.parse(sale['date']);
         final formattedDate = DateFormat('MMM dd, hh:mm a').format(date);
 
-        // Handle cashier population safely - works for both admin and cashier roles
         String cashierName = 'Unknown';
         if (sale['cashier'] != null) {
           if (sale['cashier'] is Map) {
-            // Try username first (correct field), fall back to name for compatibility
             cashierName =
                 sale['cashier']['username'] ??
                 sale['cashier']['name'] ??

@@ -22,7 +22,6 @@ class _SignupScreenState extends State<SignupScreen> {
     if (newRole == null) return;
     String previousRole = _role;
 
-    // If selecting admin, verify secret
     if (newRole == 'admin' && _role != 'admin') {
       final secretVerified = await _showAdminSecretDialog();
       if (secretVerified) {
@@ -33,7 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
             const SnackBar(content: Text('Admin verification failed')),
           );
         }
-        // Force reset the role to the previous value to update the UI
+
         setState(() {
           _role = previousRole;
           _roleVersion++;

@@ -6,7 +6,7 @@ import 'app_drawer.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final ProductService productService;
-  final Product? product; // Null if adding, not null if editing
+  final Product? product;
   final User? user;
 
   const ProductFormScreen({
@@ -34,7 +34,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with existing data if editing, or empty if adding
     _nameController = TextEditingController(text: widget.product?.name ?? '');
     _priceController = TextEditingController(
       text: widget.product?.price.toString() ?? '',
@@ -64,20 +63,18 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
     try {
       final newProduct = Product(
-        id: widget.product?.id ?? '', // ID is ignored on create
+        id: widget.product?.id ?? '',
         name: _nameController.text,
         category: _category,
         price: double.parse(_priceController.text),
         inStock: int.parse(_stockController.text) > 0,
         stockQuantity: int.parse(_stockController.text),
-        createdAt: DateTime.now(), // Ignored on update
+        createdAt: DateTime.now(),
       );
 
       if (widget.product == null) {
-        // Create
         await widget.productService.createProduct(newProduct);
       } else {
-        // Update
         await widget.productService.updateProduct(
           widget.product!.id,
           newProduct,
@@ -87,7 +84,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Product saved successfully')),
       );
-      Navigator.pop(context, true); // Return true to indicate success
+      Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(
         context,

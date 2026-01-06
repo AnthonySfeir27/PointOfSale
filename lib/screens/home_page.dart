@@ -20,7 +20,6 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -59,7 +58,6 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Tutorial Section Title
             const Text(
               'Quick Start Guide',
               style: TextStyle(
@@ -70,7 +68,6 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Tutorial Steps
             _buildTutorialStep(
               icon: Icons.shopping_cart,
               title: '1. Start a Sale',
@@ -99,7 +96,6 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // Get Started Button
             Center(
               child: ElevatedButton.icon(
                 onPressed: () {

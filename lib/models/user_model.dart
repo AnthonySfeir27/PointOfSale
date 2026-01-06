@@ -14,7 +14,6 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    // Safe date parsing - handles both String and Date objects
     DateTime? parseDate(dynamic dateValue) {
       if (dateValue == null) return null;
       if (dateValue is String) {
@@ -25,7 +24,6 @@ class User {
         }
       }
       if (dateValue is DateTime) return dateValue;
-      // If it's a number (timestamp), convert it
       if (dateValue is int)
         return DateTime.fromMillisecondsSinceEpoch(dateValue);
       return null;

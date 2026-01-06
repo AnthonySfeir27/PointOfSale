@@ -3,26 +3,16 @@ const Product = require("../models/Product");
 
 exports.getDashboardStats = async (req, res) => {
   try {
-    // 1. Total Sales Count
     const totalSales = await Sale.countDocuments();
-
-    // 2. Total Revenue (Sum of 'total' field)
     const revenueAgg = await Sale.aggregate([
       { $group: { _id: null, totalRevenue: { $sum: "$total" } } }
     ]);
     const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].totalRevenue : 0;
-
-    // 3. Low Stock Items (stockQuantity < 5)
     const lowStockCount = await Product.countDocuments({ stockQuantity: { $lt: 5 } });
-
-    // 4. Recent Transactions (Limit 5, sort by date desc)
-    // Populate with 'username' field since User model uses 'username', not 'name'
     const recentTransactions = await Sale.find()
       .sort({ date: -1 })
       .limit(5)
       .populate("cashier", "username role");
-
-    // 5. Daily aggregated data for charts (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
@@ -48,8 +38,6 @@ exports.getDashboardStats = async (req, res) => {
         $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 }
       }
     ]);
-
-    // Build array for last 7 days with zeros for missing days
     const chartLabels = [];
     const dailySalesData = [];
     const dailyRevenueData = [];

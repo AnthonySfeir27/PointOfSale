@@ -36,7 +36,6 @@ class SaleItem {
   }
 }
 
-/// Main Sale model
 class Sale {
   final String id;
   final List<SaleItem> products;
@@ -57,7 +56,6 @@ class Sale {
   });
 
   factory Sale.fromJson(Map<String, dynamic> json) {
-    // Safe date parsing - handles both String and Date objects
     DateTime parseDate(dynamic dateValue) {
       if (dateValue == null) return DateTime.now();
       if (dateValue is String) {
@@ -68,7 +66,6 @@ class Sale {
         }
       }
       if (dateValue is DateTime) return dateValue;
-      // If it's a number (timestamp), convert it
       if (dateValue is int)
         return DateTime.fromMillisecondsSinceEpoch(dateValue);
       return DateTime.now();
