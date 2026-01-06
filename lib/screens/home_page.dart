@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'app_drawer.dart';
+import '../models/user_model.dart';
 
 class HomePage extends StatelessWidget {
-  final String role;
-  const HomePage({super.key, required this.role});
+  final User user;
+  const HomePage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +17,9 @@ class HomePage extends StatelessWidget {
         }),
       );
 
-      if (role == 'admin') cards.add(buildCard(context, 'Users', Icons.people));
-      if (role == 'admin') {
+      if (user.role == 'admin')
+        cards.add(buildCard(context, 'Users', Icons.people));
+      if (user.role == 'admin') {
         cards.add(
           buildCard(context, 'Analytics', Icons.analytics, () {
             Navigator.pushNamed(context, '/dashboard');
@@ -25,11 +27,11 @@ class HomePage extends StatelessWidget {
         );
       }
 
-      if (role == 'admin' || role == 'cashier') {
+      if (user.role == 'admin' || user.role == 'cashier') {
         cards.add(
           buildCard(context, 'Sales', Icons.shopping_cart, () {
             // Also make the card navigate to the sales page
-            Navigator.pushNamed(context, '/sales', arguments: role);
+            Navigator.pushNamed(context, '/sales', arguments: user);
           }),
         );
       }
@@ -46,19 +48,12 @@ class HomePage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('$role Home')),
+      appBar: AppBar(title: Text('${user.role} Home')),
       // 2. Use the shared AppDrawer widget instead of the local one
-      drawer: AppDrawer(role: role),
+      drawer: AppDrawer(user: user),
       body: buildDashboard(),
     );
   }
-
-  // 3. This entire method should be deleted as it's now handled by app_drawer.dart
-  /*
-  Drawer buildDrawer(BuildContext context) {
-    ...
-  }
-  */
 
   // I've updated buildCard to accept an onTap callback
   Widget buildCard(

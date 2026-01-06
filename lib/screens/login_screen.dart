@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
+import '../models/user_model.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -32,8 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (res != null && res['user'] != null) {
-      final user = res['user'];
-      Navigator.pushReplacementNamed(context, '/home', arguments: user['role']);
+      final user = User.fromJson(res['user']);
+      Navigator.pushReplacementNamed(context, '/home', arguments: user);
     } else {
       setState(() {
         _error = res?['error'] ?? 'Login failed';

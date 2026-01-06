@@ -1,30 +1,25 @@
 import 'package:flutter/material.dart';
+import '../models/user_model.dart';
 
 class AppDrawer extends StatelessWidget {
-  final String role;
-  // 1. Make 'child' nullable by adding a '?'
+  final User user;
   final Widget? child;
 
-  // 2. Remove the 'required' keyword from 'child' in the constructor
-  const AppDrawer({super.key, required this.role, this.child});
+  const AppDrawer({super.key, required this.user, this.child});
 
   @override
   Widget build(BuildContext context) {
-    // 3. Add logic to handle cases where 'child' is null
     if (child != null) {
-      // If there IS a child, build the full Scaffold (for SalesPage)
       return Scaffold(
-        appBar: AppBar(title: Text('$role Home')),
+        appBar: AppBar(title: Text('${user.role} Home')),
         drawer: _buildDrawer(context),
         body: child,
       );
     } else {
-      // If there is NO child, just build the Drawer itself (for HomePage)
       return _buildDrawer(context);
     }
   }
 
-  // Extracted the drawer logic into a private method for reuse and clarity
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -33,7 +28,7 @@ class AppDrawer extends StatelessWidget {
           DrawerHeader(
             decoration: const BoxDecoration(color: Colors.deepPurple),
             child: Text(
-              role.toUpperCase(),
+              user.role.toUpperCase(),
               style: const TextStyle(color: Colors.white, fontSize: 24),
             ),
           ),
@@ -42,7 +37,7 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Dashboard'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/home', arguments: role);
+              Navigator.pushReplacementNamed(context, '/home', arguments: user);
             },
           ),
           ListTile(
@@ -53,13 +48,13 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/products');
             },
           ),
-          if (role == 'admin')
+          if (user.role == 'admin')
             ListTile(
               leading: const Icon(Icons.people),
               title: const Text('Users'),
               onTap: () => Navigator.pop(context),
             ),
-          if (role == 'admin' || role == 'cashier')
+          if (user.role == 'admin' || user.role == 'cashier')
             ListTile(
               leading: const Icon(Icons.shopping_cart),
               title: const Text('Sales'),
@@ -68,7 +63,7 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pushReplacementNamed(
                   context,
                   '/sales',
-                  arguments: role,
+                  arguments: user,
                 );
               },
             ),

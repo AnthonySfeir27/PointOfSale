@@ -10,6 +10,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/product_list_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'models/product_model.dart';
+import 'models/user_model.dart';
 import 'services/analytics_service.dart';
 import 'constants.dart';
 
@@ -53,17 +54,19 @@ class MyApp extends StatelessWidget {
           );
         },
         '/home': (context) {
-          final role =
-              ModalRoute.of(context)?.settings.arguments as String? ??
-              'cashier';
-          return HomePage(role: role);
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final user = args is User
+              ? args
+              : User(username: 'Cashier', role: 'cashier');
+          return HomePage(user: user);
         },
         '/sales': (context) {
-          final role =
-              ModalRoute.of(context)?.settings.arguments as String? ??
-              'cashier';
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final user = args is User
+              ? args
+              : User(username: 'Cashier', role: 'cashier');
           return SalesPage(
-            role: role,
+            user: user,
             productService: productService,
             saleService: saleService,
           );
