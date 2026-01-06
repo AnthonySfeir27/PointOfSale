@@ -99,57 +99,149 @@ class _SalesPageState extends State<SalesPage> {
     return _cartItems.fold(0, (sum, item) => sum + item.totalPrice);
   }
 
-  Future<void> _showSaleCompletedDialog(double total) async {
+  Future<void> _showReceiptDialog(Sale sale) async {
+    final dateFormat = DateTime.now().toString().substring(0, 16);
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
           ),
-          title: const Column(
-            children: [
-              Icon(Icons.check_circle_outline, color: Colors.green, size: 60),
-              SizedBox(height: 16),
-              Text('Sale Completed'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('The transaction was successful.'),
-              const SizedBox(height: 8),
-              Text(
-                'Total: \$${total.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.receipt_long,
+                  size: 48,
+                  color: Colors.deepPurple,
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'The ticket has been cleared.',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-          actions: [
-            Center(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
+                const SizedBox(height: 12),
+                const Text(
+                  'SUPERMARKET POS',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
                   ),
                 ),
-                child: const Text('OK'),
-              ),
+                Text(
+                  'Store #1234 - Tel: 01-234567',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                const Divider(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Date: $dateFormat',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    Text(
+                      'Cashier: ${widget.user.username}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 250),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: sale.products.length,
+                    itemBuilder: (context, index) {
+                      final item = sale.products[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${item.quantity}x ${item.product.name}',
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            Text(
+                              '\$${(item.product.price * item.quantity).toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const Divider(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'TOTAL',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      '\$${sale.total.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Printing functionality coming soon...',
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.print),
+                        label: const Text('Print'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Done'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -199,18 +291,24 @@ class _SalesPageState extends State<SalesPage> {
       });
 
       if (isParking) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ticket parked successfully!')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Ticket parked successfully!')),
+          );
+        }
       } else {
-        await _showSaleCompletedDialog(total);
+        await _showReceiptDialog(sale);
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed: $e')));
+      }
     } finally {
-      setState(() => _processingSale = false);
+      if (mounted) {
+        setState(() => _processingSale = false);
+      }
     }
   }
 
@@ -246,13 +344,17 @@ class _SalesPageState extends State<SalesPage> {
       await widget.saleService.deleteSale(id);
       list.removeWhere((s) => s.id == id);
       setState(() {});
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Parked ticket deleted.')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Parked ticket deleted.')));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+      }
     }
   }
 
@@ -366,13 +468,15 @@ class _SalesPageState extends State<SalesPage> {
         );
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Failed to load tickets: $e')));
       }
     } finally {
-      setState(() => _processingSale = false);
+      if (mounted) {
+        setState(() => _processingSale = false);
+      }
     }
   }
 
@@ -456,13 +560,17 @@ class _SalesPageState extends State<SalesPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             CircleAvatar(
-                              backgroundColor: Colors.deepPurple.shade50,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
                               child: Text(
                                 product.name.isNotEmpty
                                     ? product.name[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
-                                  color: Colors.deepPurple,
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
                                 ),
                               ),
                             ),
@@ -500,15 +608,14 @@ class _SalesPageState extends State<SalesPage> {
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.deepPurple.shade50,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   width: double.infinity,
-                  child: const Text(
+                  child: Text(
                     "Current Ticket",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                     ),
                   ),
                 ),
@@ -557,12 +664,12 @@ class _SalesPageState extends State<SalesPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     boxShadow: [
                       BoxShadow(
-                        blurRadius: 5,
+                        blurRadius: 10,
                         color: Colors.black.withOpacity(0.1),
-                        offset: const Offset(0, -2),
+                        offset: const Offset(0, -5),
                       ),
                     ],
                   ),
@@ -580,10 +687,10 @@ class _SalesPageState extends State<SalesPage> {
                           ),
                           Text(
                             "\$${_calculateTotal().toStringAsFixed(2)}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ],

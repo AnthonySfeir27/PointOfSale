@@ -154,12 +154,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: Colors.deepPurple.shade100,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer,
                           child: Text(
                             product.name.isNotEmpty
                                 ? product.name[0].toUpperCase()
                                 : '?',
-                            style: const TextStyle(color: Colors.deepPurple),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
                           ),
                         ),
                         title: Text(

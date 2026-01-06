@@ -174,12 +174,18 @@ class _UserListScreenState extends State<UserListScreen> {
                       ),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: Colors.deepPurple.shade100,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer,
                           child: Text(
                             user.username.isNotEmpty
                                 ? user.username[0].toUpperCase()
                                 : '?',
-                            style: const TextStyle(color: Colors.deepPurple),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
                           ),
                         ),
                         title: Text(user.username),
