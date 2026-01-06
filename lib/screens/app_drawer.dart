@@ -45,7 +45,11 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Products'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/products');
+              Navigator.pushReplacementNamed(
+                context,
+                '/products',
+                arguments: user,
+              );
             },
           ),
           if (user.role == 'admin')
@@ -57,6 +61,19 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pushReplacementNamed(
                   context,
                   '/users',
+                  arguments: user,
+                );
+              },
+            ),
+          if (user.role == 'admin')
+            ListTile(
+              leading: const Icon(Icons.analytics),
+              title: const Text('Analytics'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacementNamed(
+                  context,
+                  '/dashboard',
                   arguments: user,
                 );
               },

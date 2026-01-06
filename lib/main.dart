@@ -48,15 +48,35 @@ class MyApp extends StatelessWidget {
           final user = args is User ? args : null;
           return UserListScreen(userService: userService, currentUser: user);
         },
-        '/dashboard': (_) =>
-            DashboardScreen(analyticsService: analyticsService),
-        '/products': (_) => ProductListScreen(productService: productService),
+        '/dashboard': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final user = args is User
+              ? args
+              : User(username: 'Admin', role: 'admin');
+          return DashboardScreen(
+            analyticsService: analyticsService,
+            user: user,
+          );
+        },
+        '/products': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final user = args is User ? args : null;
+          return ProductListScreen(productService: productService, user: user);
+        },
         '/edit-product': (context) {
-          final product =
-              ModalRoute.of(context)?.settings.arguments as Product?;
+          final args = ModalRoute.of(context)?.settings.arguments;
+          Product? product;
+          User? user;
+          if (args is Map) {
+            product = args['product'] as Product?;
+            user = args['user'] as User?;
+          } else if (args is Product) {
+            product = args;
+          }
           return ProductFormScreen(
             productService: productService,
             product: product,
+            user: user,
           );
         },
         '/home': (context) {

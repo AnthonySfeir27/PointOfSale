@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../services/product_service.dart';
 import '../models/product_model.dart';
+import '../models/user_model.dart';
+import 'app_drawer.dart';
 
 class ProductListScreen extends StatefulWidget {
   final ProductService productService;
+  final User? user;
 
-  const ProductListScreen({super.key, required this.productService});
+  const ProductListScreen({super.key, required this.productService, this.user});
 
   @override
   _ProductListScreenState createState() => _ProductListScreenState();
@@ -61,7 +64,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     final result = await Navigator.pushNamed(
       context,
       '/edit-product',
-      arguments: product,
+      arguments: {'product': product, 'user': widget.user},
     );
     if (result == true) {
       _refreshProducts();
@@ -80,6 +83,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         ],
       ),
+      drawer: widget.user != null ? AppDrawer(user: widget.user!) : null,
       body: Column(
         children: [
           Padding(

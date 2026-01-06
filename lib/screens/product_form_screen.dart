@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import '../services/product_service.dart';
 import '../models/product_model.dart';
+import '../models/user_model.dart';
+import 'app_drawer.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final ProductService productService;
   final Product? product; // Null if adding, not null if editing
+  final User? user;
 
   const ProductFormScreen({
     super.key,
     required this.productService,
     this.product,
+    this.user,
   });
 
   @override
@@ -100,6 +104,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(isEditing ? 'Edit Product' : 'Add Product')),
+      drawer: widget.user != null ? AppDrawer(user: widget.user!) : null,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

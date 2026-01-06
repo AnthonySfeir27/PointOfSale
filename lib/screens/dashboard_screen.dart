@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import '../services/analytics_service.dart';
 import '../models/dashboard_stats.dart';
+import '../models/user_model.dart';
+import 'app_drawer.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
   final AnalyticsService analyticsService;
+  final User user;
 
-  const DashboardScreen({super.key, required this.analyticsService});
+  const DashboardScreen({
+    super.key,
+    required this.analyticsService,
+    required this.user,
+  });
 
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
@@ -36,6 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshStats),
         ],
       ),
+      drawer: AppDrawer(user: widget.user),
       body: FutureBuilder<DashboardStats>(
         future: _statsFuture,
         builder: (context, snapshot) {
